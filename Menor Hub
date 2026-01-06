@@ -1,0 +1,243 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- --- CONFIGURAÇÕES DO HUB ---
+local SENHA_CORRETA = "Menor-5749754754987548"
+local USER_VIP = "GabrielYTFFH4X"
+local DISCORD_LINK = "https://discord.gg/bcDh9PqwzE"
+
+local GhostAtivado = false
+local FakeLagAtivado = false
+local AutoMsgKill = false
+local AutoMsgDie = false
+local Clone = nil
+local FakePlatform = nil
+
+local FrasesKill = {"Até minha mãe e melhor", "Matei com lag ainda", "Posso joga serio?", "ez dms"}
+local FrasesDie = {"Deixei", "tava nem jogando serio", "Mds olha como vc joga", "n matei pq n quis KKK"}
+
+-- --- INTERFACE PRINCIPAL ---
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+
+-- 1. TELA DE LOGIN (KEY)
+local KeyFrame = Instance.new("Frame", ScreenGui)
+KeyFrame.Size = UDim2.new(0, 300, 0, 250)
+KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+KeyFrame.BorderSizePixel = 0
+Instance.new("UICorner", KeyFrame)
+
+local KeyTitle = Instance.new("TextLabel", KeyFrame)
+KeyTitle.Size = UDim2.new(1, 0, 0, 50)
+KeyTitle.Text = "Menor Hub - Digite A Senha:"
+KeyTitle.TextColor3 = Color3.new(1, 1, 1)
+KeyTitle.Font = Enum.Font.GothamBold
+KeyTitle.TextSize = 18
+KeyTitle.BackgroundTransparency = 1
+
+local KeyInput = Instance.new("TextBox", KeyFrame)
+KeyInput.Size = UDim2.new(0, 250, 0, 40)
+KeyInput.Position = UDim2.new(0.5, -125, 0.4, 0)
+KeyInput.PlaceholderText = "Insira a Key aqui..."
+KeyInput.Text = ""
+KeyInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+KeyInput.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", KeyInput)
+
+local KeyBtn = Instance.new("TextButton", KeyFrame)
+KeyBtn.Size = UDim2.new(0, 120, 0, 40)
+KeyBtn.Position = UDim2.new(0.2, -30, 0.7, 0)
+KeyBtn.Text = "Entrar"
+KeyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+KeyBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", KeyBtn)
+
+local DiscordBtn = Instance.new("TextButton", KeyFrame)
+DiscordBtn.Size = UDim2.new(0, 150, 0, 40)
+DiscordBtn.Position = UDim2.new(0.6, -10, 0.7, 0)
+DiscordBtn.Text = "Discord Key 🔑"
+DiscordBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+DiscordBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", DiscordBtn)
+
+-- 2. MENU PRINCIPAL (HUB)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 250, 0, 450)
+MainFrame.Position = UDim2.new(0.02, 0, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Visible = false
+Instance.new("UICorner", MainFrame)
+
+-- BOLINHA USUÁRIO (Canto Superior Esquerdo do Script)
+local UserIcon = Instance.new("ImageLabel", MainFrame)
+UserIcon.Size = UDim2.new(0, 40, 0, 40)
+UserIcon.Position = UDim2.new(0, 10, 0, -50)
+UserIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+UserIcon.Image = "rbxthumb://type=AvatarHeadShot&id="..LocalPlayer.UserId.."&w=150&h=150"
+local UIHeadCorner = Instance.new("UICorner", UserIcon)
+UIHeadCorner.CornerRadius = UDim.new(1, 0)
+
+-- CRIADOR (Canto Superior Direito)
+local CreatorIcon = Instance.new("ImageLabel", MainFrame)
+CreatorIcon.Size = UDim2.new(0, 40, 0, 40)
+CreatorIcon.Position = UDim2.new(1, -50, 0, -50)
+CreatorIcon.Image = "rbxassetid://131976657277861" -- Placeholder para Gabriel
+Instance.new("UICorner", CreatorIcon).CornerRadius = UDim.new(1, 0)
+
+local CreatorLabel = Instance.new("TextLabel", MainFrame)
+CreatorLabel.Size = UDim2.new(0, 100, 0, 20)
+CreatorLabel.Position = UDim2.new(1, -155, 0, -50)
+CreatorLabel.Text = "Criador:"
+CreatorLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+CreatorLabel.TextXAlignment = Enum.TextXAlignment.Right
+CreatorLabel.BackgroundTransparency = 1
+
+local CreatorName = Instance.new("TextLabel", MainFrame)
+CreatorName.Size = UDim2.new(0, 100, 0, 20)
+CreatorName.Position = UDim2.new(1, -155, 0, -35)
+CreatorName.Text = "GabrielYTFFH4X"
+CreatorName.TextColor3 = Color3.new(1, 1, 1)
+CreatorName.TextXAlignment = Enum.TextXAlignment.Right
+CreatorName.BackgroundTransparency = 1
+CreatorName.Font = Enum.Font.GothamBold
+
+local HubTitle = Instance.new("TextLabel", MainFrame)
+HubTitle.Size = UDim2.new(1, 0, 0, 40)
+HubTitle.Text = "Menor Hub V26"
+HubTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+HubTitle.Font = Enum.Font.GothamBold
+HubTitle.TextSize = 22
+HubTitle.BackgroundTransparency = 1
+
+-- --- FUNÇÕES ---
+local function EnviarChat(tabela)
+    local msg = tabela[math.random(1, #tabela)]
+    if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
+        game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(msg)
+    else
+        ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+    end
+end
+
+local function CriarBtn(texto, yPos, cor, iconId)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0, 230, 0, 50)
+    btn.Position = UDim2.new(0, 10, 0, yPos)
+    btn.BackgroundColor3 = cor or Color3.fromRGB(30, 30, 30)
+    btn.Text = "   "..texto
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    Instance.new("UICorner", btn)
+
+    if iconId then
+        local img = Instance.new("ImageLabel", btn)
+        img.Size = UDim2.new(0, 30, 0, 30)
+        img.Position = UDim2.new(0, 10, 0.5, -15)
+        img.BackgroundTransparency = 1
+        img.Image = iconId
+    end
+    return btn
+end
+
+-- --- BOTÕES DO MENU ---
+local BGhost = CriarBtn("GHOST MODE 👻", 50, Color3.fromRGB(40, 40, 40), "rbxassetid://1458187149961597079")
+local BFakeLag = CriarBtn("FAKE LAG 🧊", 110, Color3.fromRGB(255, 255, 255), "rbxassetid://1458188216375972013")
+BFakeLag.TextColor3 = Color3.new(0, 0, 0)
+
+local BKill = CriarBtn("MSG KILL 🔪", 170, Color3.fromRGB(0, 100, 0), "rbxassetid://1458188681125957855")
+local BDie = CriarBtn("MSG DIE 💀", 230, Color3.fromRGB(120, 0, 0), "rbxassetid://1458188681125957855")
+
+local BDisc = CriarBtn("DISCORD 💬", 310, Color3.fromRGB(88, 101, 242), "rbxassetid://1458189006188838944")
+local BSair = CriarBtn("FECHAR HUB", 380, Color3.fromRGB(80, 80, 80))
+
+-- --- LOGICA ---
+BGhost.MouseButton1Click:Connect(function()
+    GhostAtivado = not GhostAtivado
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    if GhostAtivado then
+        BGhost.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        char.Archivable = true
+        Clone = char:Clone()
+        Clone.Parent = workspace
+        char.Archivable = false
+        for _, v in pairs(Clone:GetDescendants()) do if v:IsA("BasePart") then v.Color = Color3.new(0,1,1) v.Transparency = 0.5 v.CanCollide = false elseif v:IsA("LocalScript") or v:IsA("Script") then v:Destroy() end end
+        FakePlatform = Instance.new("Part", workspace); FakePlatform.Size = Vector3.new(10,1,10); FakePlatform.Anchored = true; FakePlatform.Transparency = 1
+        Camera.CameraSubject = Clone.Humanoid
+        task.spawn(function()
+            while GhostAtivado do
+                if not Clone or not char:FindFirstChild("HumanoidRootPart") then break end
+                Clone.Humanoid:Move(char.Humanoid.MoveDirection, false)
+                Clone.HumanoidRootPart.CFrame = CFrame.new(Clone.HumanoidRootPart.Position, Clone.HumanoidRootPart.Position + Vector3.new(Camera.CFrame.LookVector.X, 0, Camera.CFrame.LookVector.Z))
+                FakePlatform.Position = Clone.HumanoidRootPart.Position + Vector3.new(0,-16,0)
+                char.HumanoidRootPart.CFrame = Clone.HumanoidRootPart.CFrame * CFrame.new(0,-15,0)
+                RunService.Heartbeat:Wait()
+            end
+        end)
+    else
+        BGhost.BackgroundColor3 = Color3.fromRGB(40,40,40)
+        if Clone then char:PivotTo(Clone.HumanoidRootPart.CFrame); Clone:Destroy(); Clone = nil; FakePlatform:Destroy() end
+        Camera.CameraSubject = char.Humanoid
+    end
+end)
+
+BFakeLag.MouseButton1Click:Connect(function()
+    FakeLagAtivado = not FakeLagAtivado
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") then v.Anchored = FakeLagAtivado end
+        end
+    end
+    BFakeLag.BackgroundColor3 = FakeLagAtivado and Color3.fromRGB(200, 200, 200) or Color3.fromRGB(255, 255, 255)
+end)
+
+BKill.MouseButton1Click:Connect(function() AutoMsgKill = not AutoMsgKill BKill.Text = AutoMsgKill and "   MSG KILL: ON" or "   MSG KILL: OFF" end)
+BDie.MouseButton1Click:Connect(function() AutoMsgDie = not AutoMsgDie BDie.Text = AutoMsgDie and "   MSG DIE: ON" or "   MSG DIE: OFF" end)
+
+BDisc.MouseButton1Click:Connect(function() setclipboard(DISCORD_LINK) print("Copiado com sucesso!") end)
+BSair.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+-- --- VERIFICAÇÃO DE KEY / VIP ---
+local function AbrirHub()
+    KeyFrame.Visible = false
+    MainFrame.Visible = true
+end
+
+KeyBtn.MouseButton1Click:Connect(function()
+    if KeyInput.Text == SENHA_CORRETA then
+        AbrirHub()
+    else
+        KeyInput.Text = ""
+        KeyInput.PlaceholderText = "SENHA INCORRETA!"
+        task.wait(1)
+        KeyInput.PlaceholderText = "Insira a Key aqui..."
+    end
+end)
+
+DiscordBtn.MouseButton1Click:Connect(function()
+    setclipboard(DISCORD_LINK)
+    local oldText = DiscordBtn.Text
+    DiscordBtn.Text = "COPIADO COM SUCESSO!"
+    task.wait(2)
+    DiscordBtn.Text = oldText
+end)
+
+if LocalPlayer.Name == USER_VIP then
+    AbrirHub()
+end
+
+-- Monitor de Mensagens
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function(c)
+        c:WaitForChild("Humanoid").Died:Connect(function()
+            if AutoMsgKill and (LocalPlayer.Character.PrimaryPart.Position - c.PrimaryPart.Position).Magnitude < 25 then EnviarChat(FrasesKill) end
+        end)
+    end)
+end)
+LocalPlayer.Character.Humanoid.Died:Connect(function() if AutoMsgDie then EnviarChat(FrasesDie) end end)
